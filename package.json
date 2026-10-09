@@ -13,13 +13,13 @@
   ],
   "license": "MIT",
   "author": "Mikhail Badin",
-  "homepage": "https://github.com/OWNER/opencode-read-document#readme",
+  "homepage": "https://github.com/axel-pro/opencode-read-document#readme",
   "bugs": {
-    "url": "https://github.com/OWNER/opencode-read-document/issues"
+    "url": "https://github.com/axel-pro/opencode-read-document/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/OWNER/opencode-read-document.git"
+    "url": "git+https://github.com/axel-pro/opencode-read-document.git"
   },
   "main": "src/index.ts",
   "bin": {
