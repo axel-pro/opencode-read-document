@@ -30,19 +30,15 @@
     "src"
   ],
   "scripts": {
-    "test": "node --test test/*.test.js",
-    "prepublishOnly": "npm test"
+    "test": "node --test test/*.test.js"
   },
   "engines": {
     "node": ">=22.13.0",
     "opencode": "^1.18.0"
   },
-  "publishConfig": {
-    "access": "public",
-    "provenance": true
-  },
   "dependencies": {
     "@opencode-ai/plugin": "^1.18.35",
     "officeparser": "8.1.1"
-  }
+  },
+  "private": true
 }

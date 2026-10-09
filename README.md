@@ -12,17 +12,31 @@ nothing besides Node.js is required (no Python, LibreOffice or Pandoc).
 
 ## Installation
 
-Add the plugin to `opencode.json` (in the project or in `~/.config/opencode/`):
+The package is not published to npm; npm installs it straight from GitHub, pinned to a release tag.
+Add it to the `package.json` of your project and run `npm install`:
+
+```json
+{
+  "devDependencies": {
+    "opencode-read-document": "github:axel-pro/opencode-read-document#v0.1.0"
+  }
+}
+```
+
+Then add the plugin to `opencode.json` by path (relative to `opencode.json`):
 
 ```json
 {
   "$schema": "https://opencode.ai/config.json",
-  "plugin": ["opencode-read-document"]
+  "plugin": ["./node_modules/opencode-read-document"]
 }
 ```
 
-OpenCode installs it on the next start. Requirements: OpenCode 1.18+ and Node.js 22.13+ in `PATH`
-(the tool runs the converter as a separate `node` process).
+Requirements: OpenCode 1.18+ and Node.js 22.13+ in `PATH` (the tool runs the converter as a separate `node`
+process).
+
+To update, change the tag and run `npm install` again, then restart OpenCode. Versions are listed on the
+[Tags](https://github.com/axel-pro/opencode-read-document/tags) page.
 
 ## The `read_document` tool
 
@@ -45,10 +59,16 @@ What is deliberately not carried over:
 
 ## Command line
 
-The same converter is available as the `read-document` command:
+The same converter is available as the `read-document` command. After installation:
 
 ```sh
-npx opencode-read-document spec.docx > spec.md
+npx read-document spec.docx > spec.md
+```
+
+Without installing, straight from GitHub:
+
+```sh
+npx github:axel-pro/opencode-read-document#v0.1.0 spec.docx > spec.md
 ```
 
 ```
@@ -88,16 +108,15 @@ To try a local checkout in OpenCode, point the plugin at the directory:
 
 ## Releasing
 
-Publishing is done by the `Publish to npm` GitHub Actions workflow when a `v*` tag is pushed.
-The tag must match the version in `package.json`.
+A release is a `vX.Y.Z` git tag: users pin it in their `package.json`.
 
 ```sh
-npm version patch        # bumps package.json, commits and creates the v* tag
+npm version patch   # or minor / major: updates package.json and creates the vX.Y.Z tag
 git push --follow-tags
 ```
 
-One-time setup: create an npm access token (Automation or Granular with publish rights) and add it to the
-repository secrets as `NPM_TOKEN`.
+GitHub Actions (`.github/workflows/ci.yml`) runs the tests on Node.js 22 and 24 on every push to `main`
+and on pull requests. There is no release workflow: the tag itself is the release.
 
 ## License
 
