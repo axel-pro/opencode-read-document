@@ -1,0 +1,48 @@
+{
+  "name": "opencode-read-document",
+  "version": "0.1.0",
+  "description": "OpenCode plugin: the read_document tool reads PDF and office documents as Markdown",
+  "keywords": [
+    "opencode",
+    "opencode-plugin",
+    "markdown",
+    "pdf",
+    "docx",
+    "xlsx",
+    "pptx"
+  ],
+  "license": "MIT",
+  "author": "Mikhail Badin",
+  "homepage": "https://github.com/OWNER/opencode-read-document#readme",
+  "bugs": {
+    "url": "https://github.com/OWNER/opencode-read-document/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OWNER/opencode-read-document.git"
+  },
+  "main": "src/index.ts",
+  "bin": {
+    "read-document": "bin/read-document"
+  },
+  "files": [
+    "bin",
+    "src"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "prepublishOnly": "npm test"
+  },
+  "engines": {
+    "node": ">=22.13.0",
+    "opencode": "^1.18.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "dependencies": {
+    "@opencode-ai/plugin": "^1.18.35",
+    "officeparser": "8.1.1"
+  }
+}

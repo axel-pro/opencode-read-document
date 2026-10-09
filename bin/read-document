@@ -1,0 +1,77 @@
+#!/usr/bin/env node
+// read-document — converts a document (PDF, DOCX, XLSX, PPTX, ODT, etc.) to Markdown so an agent can read it.
+// The agent calls it through the read_document tool (src/index.ts in this package).
+//
+// Specs, regulations and spreadsheets usually arrive in office formats, while the model only accepts text
+// and images. The script keeps the structure that matters for requirements: headings, lists, tables.
+// It runs on officeparser, a pure JavaScript library, so nothing besides Node needs to be installed.
+//
+// Deliberately not carried over:
+//   - images: in PDFs with screenshots they turn into megabytes of base64 and push the text out of context;
+//   - text of scans: recognition (OCR) is disabled, it is slow and downloads language models from the network.
+//     If there is almost no text, the script warns that the document looks like a scan.
+"use strict";
+
+const fs = require("node:fs");
+
+const USAGE = `Usage:
+  read-document <file>            print the document as Markdown
+  read-document <file> > <path>   save it to a file
+
+Formats: pdf, docx, xlsx, pptx, odt, ods, odp, rtf, epub, html, csv. Legacy .doc, .xls, .ppt are not supported:
+  re-save them in a newer format.
+Exit codes: 0 — done; 1 — the document could not be read; 2 — invalid invocation.
+`;
+
+function fail(message, code) {
+  process.stderr.write(`read-document: ${message}\n`);
+  process.exit(code);
+}
+
+function parseArgs(argv) {
+  let input;
+  for (const arg of argv) {
+    if (arg === "-h" || arg === "--help") {
+      process.stdout.write(USAGE);
+      process.exit(0);
+    } else if (arg.startsWith("-")) {
+      fail(`unknown option ${arg}\n\n${USAGE}`, 2);
+    } else if (input) {
+      fail(`expected one file, got several\n\n${USAGE}`, 2);
+    } else {
+      input = arg;
+    }
+  }
+  if (!input) fail(`no file given\n\n${USAGE}`, 2);
+  return input;
+}
+
+async function main() {
+  const input = parseArgs(process.argv.slice(2));
+  if (!fs.existsSync(input)) fail(`${input} does not exist`, 1);
+  if (fs.statSync(input).isDirectory()) fail(`${input} is a directory, expected a file`, 1);
+
+  const { convert } = require("officeparser");
+  let result;
+  try {
+    result = await convert(input, "md", {
+      // Internal links and anchors are dropped: the agent does not need them, and without this option
+      // headings come out as "# Heading {#heading}".
+      generatorConfig: { includeImages: "none", ignoreInternalLinks: true, mdConfig: { dialect: "gitlab" } },
+    });
+  } catch (error) {
+    fail(`${input}: ${String(error?.message ?? error).replace(/^\[OfficeParser\]:\s*/, "")}`, 1);
+  }
+
+  const markdown = `${String(result.value).trim()}\n`;
+  for (const issue of result.messages ?? []) {
+    if (issue.type !== "info") process.stderr.write(`read-document: ${issue.type}: ${issue.message}\n`);
+  }
+  const body = markdown.replace(/^---\n[\s\S]*?\n---\n/, ""); // without the leading metadata block
+  if (!/\p{L}/u.test(body)) {
+    process.stderr.write(`read-document: ${input}: almost no text — looks like a scan or images only; OCR is disabled\n`);
+  }
+  process.stdout.write(markdown);
+}
+
+main().catch((error) => fail(String(error?.stack ?? error), 1));
